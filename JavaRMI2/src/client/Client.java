@@ -1,121 +1,91 @@
 package client;
 
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import rental.Quote;
+import rental.CarType;
 import rental.Reservation;
+import rentalagency.ManagerSessionRemote;
+import rentalagency.ReservationSessionRemote;
+import rentalagency.SessionCreationServiceRemote;
 
-public class Client extends AbstractScriptedSimpleTest {
-	
-	/********
-	 * MAIN *
-	 ********/
-	
-	public static void main(String[] args) throws Exception {
-		
-		String carRentalCompanyName = "Hertz";
-		
-		// An example reservation scenario on car rental company 'Hertz' would be...
-		Client client = new Client("simpleTrips", carRentalCompanyName);
-		client.run();
-	}
-	
-	/***************
-	 * CONSTRUCTOR *
-	 ***************/
-	
-	public Client(String scriptFile, String carRentalCompanyName) {
-		super(scriptFile);
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
-	
-	/**
-	 * Check which car types are available in the given period
-	 * and print this list of car types.
-	 *
-	 * @param 	start
-	 * 			start time of the period
-	 * @param 	end
-	 * 			end time of the period
-	 * @throws 	Exception
-	 * 			if things go wrong, throw exception
-	 */
-	@Override
-	protected void checkForAvailableCarTypes(Date start, Date end) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
+public class Client extends
+        AbstractScriptedTripTest<ReservationSessionRemote, ManagerSessionRemote> {
+    protected SessionCreationServiceRemote sessionCreationService;
 
-	/**
-	 * Retrieve a quote for a given car type (tentative reservation).
-	 * 
-	 * @param	clientName 
-	 * 			name of the client 
-	 * @param 	start 
-	 * 			start time for the quote
-	 * @param 	end 
-	 * 			end time for the quote
-	 * @param 	carType 
-	 * 			type of car to be reserved
-	 * @return	the newly created quote
-	 *  
-	 * @throws 	Exception
-	 * 			if things go wrong, throw exception
-	 */
-	@Override
-	protected Quote createQuote(String clientName, Date start, Date end,
-			String carType) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
+    public Client(String scriptFile,
+            SessionCreationServiceRemote sessionCreationService) {
+        super(scriptFile);
+        this.sessionCreationService = sessionCreationService;
+    }
 
-	/**
-	 * Confirm the given quote to receive a final reservation of a car.
-	 * 
-	 * @param 	quote 
-	 * 			the quote to be confirmed
-	 * @return	the final reservation of a car
-	 * 
-	 * @throws 	Exception
-	 * 			if things go wrong, throw exception
-	 */
-	@Override
-	protected Reservation confirmQuote(Quote quote) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
-	
-	/**
-	 * Get all reservations made by the given client.
-	 *
-	 * @param 	clientName
-	 * 			name of the client
-	 * @return	the list of reservations of the given client
-	 * 
-	 * @throws 	Exception
-	 * 			if things go wrong, throw exception
-	 */
-	@Override
-	protected List<Reservation> getReservationsBy(String clientName) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
+    @Override
+    protected ReservationSessionRemote getNewReservationSession(String name)
+            throws Exception {
+        return sessionCreationService.getNewReservationSession(name);
+    }
 
-	/**
-	 * Get the number of reservations for a particular car type.
-	 * 
-	 * @param 	carType 
-	 * 			name of the car type
-	 * @return 	number of reservations for the given car type
-	 * 
-	 * @throws 	Exception
-	 * 			if things go wrong, throw exception
-	 */
-	@Override
-	protected int getNumberOfReservationsForCarType(String carType) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO");
-	}
+    @Override
+    protected ManagerSessionRemote getNewManagerSession(String name) throws Exception {
+        return sessionCreationService.getNewManagerSession(name);
+    }
+
+    @Override
+    protected void checkForAvailableCarTypes(ReservationSessionRemote session,
+            Date start, Date end) throws Exception {
+        session.getAvailableCarTypes(start, end);
+    }
+
+    @Override
+    protected void addQuoteToSession(ReservationSessionRemote session, Date start,
+            Date end, String carType, String carRentalName) throws Exception {
+        session.createQuote(carRentalName, start, end, carType);
+    }
+
+    @Override
+    protected List<Reservation> confirmQuotes(ReservationSessionRemote session)
+            throws Exception {
+        List<Reservation> reservations = new ArrayList<Reservation>(session
+                .confirmQuotes());
+        return reservations;
+    }
+
+    @Override
+    protected int getNumberOfReservationsBy(ManagerSessionRemote ms, String clientName)
+            throws Exception {
+        return ms.getNbReservationsBy(clientName);
+    }
+
+    @Override
+    protected int getNumberOfReservationsForCarType(ManagerSessionRemote ms,
+            String carRentalCompanyName, String carType) throws Exception {
+        return ms.getNbReservations(carRentalCompanyName, carType);
+    }
+
+    @Override
+    protected String getMostPopularCarRentalCompany(ManagerSessionRemote ms)
+            throws Exception {
+        return ms.getMostPopularCompany();
+    }
+
+    @Override
+    protected CarType getMostPopularCarTypeIn(ManagerSessionRemote ms,
+            String carRentalCompanyName) throws Exception {
+        return ms.getMostPopularCarTypeAt(carRentalCompanyName);
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        System.setSecurityManager(null);
+        Registry registry = LocateRegistry.getRegistry(args[0]);
+        SessionCreationServiceRemote sessionCreationService = (SessionCreationServiceRemote) registry
+                .lookup("SessionCreationService");
+
+        Client client = new Client("trips", sessionCreationService);
+        client.run();
+    }
+
 }

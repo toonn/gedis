@@ -3,6 +3,7 @@ package rentalagency;
 import java.rmi.RemoteException;
 import java.util.Set;
 
+import rental.CarType;
 import rental.RentalCompanyRemote;
 
 public interface ManagerSessionRemote extends SessionRemote {
@@ -22,6 +23,6 @@ public interface ManagerSessionRemote extends SessionRemote {
 
     public String getMostPopularCompany() throws RemoteException;
 
-    public String getMostPopularCarTypeAt(String companyName)
+    public CarType getMostPopularCarTypeAt(String companyName)
             throws RemoteException;
 }

@@ -1,6 +1,9 @@
 package rental;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import rentalagency.SessionCreationServiceRemote;
 
 public class RentalCompany implements RentalCompanyRemote {
 
@@ -25,13 +30,27 @@ public class RentalCompany implements RentalCompanyRemote {
      * CONSTRUCTOR *
      ***************/
 
-    public RentalCompany(String name, List<Car> cars) {
+    public RentalCompany(String name, List<Car> cars, String rentalAgencyHost) {
         logger.log(Level.INFO, "<{0}> Car Rental Company {0} starting up...",
                 name);
         setName(name);
         this.cars = cars;
         for (Car car : cars)
             carTypes.put(car.getType().getName(), car.getType());
+
+        try {
+            String SCSName = "SessionCreationService";
+            Registry registry = LocateRegistry.getRegistry(rentalAgencyHost);
+            SessionCreationServiceRemote sessionCreationService = (SessionCreationServiceRemote) registry
+                    .lookup(SCSName);
+
+            RentalCompanyRemote stub = (RentalCompanyRemote) UnicastRemoteObject
+                    .exportObject(this, 0);
+            sessionCreationService.getNewManagerSession(name).registerCompany(
+                    stub);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /********
@@ -52,6 +71,13 @@ public class RentalCompany implements RentalCompanyRemote {
 
     public Collection<CarType> getAllCarTypes() {
         return carTypes.values();
+    }
+
+    public Set<String> getAllCarTypeStrings() {
+        Set<String> allCarTypeStrings = new HashSet<String>();
+        for (CarType ct : getAllCarTypes())
+            allCarTypeStrings.add(ct.getName());
+        return allCarTypeStrings;
     }
 
     public CarType getCarType(String carTypeName) {
@@ -229,9 +255,51 @@ public class RentalCompany implements RentalCompanyRemote {
     }
 
     @Override
-    public void rollbackReservations(Set<Reservation> reservations)
-            throws RemoteException {
+    public void rollbackReservations(Set<Reservation> reservations) {
         for (Reservation res : reservations)
             cancelReservation(res);
     }
+
+    @Override
+    public int getNbReservations(String carType) {
+        int nbReservations = 0;
+        for (Car car : cars) {
+            if (car.getType().getName().equals(carType)) {
+                nbReservations += car.nbReservations();
+            }
+        }
+
+        return nbReservations;
+    }
+
+    @Override
+    public int getNbReservationsBy(String renter) {
+        int nbReservations = 0;
+        for (Car car : cars) {
+            nbReservations += car.nbReservationsBy(renter);
+        }
+        return nbReservations;
+    }
+
+    @Override
+    public int getNbReservations() {
+        int nbReservations = 0;
+        for (String carType : carTypes.keySet())
+            nbReservations += getNbReservations(carType);
+        return nbReservations;
+    }
+
+    @Override
+    public CarType getMostPopularCarType() {
+        CarType mostPopularCarType = null;
+        int nbReservations = Integer.MIN_VALUE;
+        for (String carType : carTypes.keySet()) {
+            if (getNbReservations(carType) >= nbReservations) {
+                mostPopularCarType = carTypes.get(carType);
+                nbReservations = getNbReservations(carType);
+            }
+        }
+        return mostPopularCarType;
+    }
+
 }

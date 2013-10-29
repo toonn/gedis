@@ -13,9 +13,9 @@ public class Car {
     /***************
      * CONSTRUCTOR *
      ***************/
-    
+
     public Car(int uid, CarType type) {
-    	this.id = uid;
+        this.id = uid;
         this.type = type;
         this.reservations = new ArrayList<Reservation>();
     }
@@ -23,15 +23,15 @@ public class Car {
     /******
      * ID *
      ******/
-    
+
     public int getId() {
-    	return id;
+        return id;
     }
-    
+
     /************
      * CAR TYPE *
      ************/
-    
+
     public CarType getType() {
         return type;
     }
@@ -41,23 +41,37 @@ public class Car {
      ****************/
 
     public boolean isAvailable(Date start, Date end) {
-        if(!start.before(end))
+        if (!start.before(end))
             throw new IllegalArgumentException("Illegal given period");
 
-        for(Reservation reservation : reservations) {
-            if(reservation.getEndDate().before(start) || reservation.getStartDate().after(end))
+        for (Reservation reservation : reservations) {
+            if (reservation.getEndDate().before(start)
+                    || reservation.getStartDate().after(end))
                 continue;
             return false;
         }
         return true;
     }
-    
+
     public void addReservation(Reservation res) {
         reservations.add(res);
     }
-    
+
     public void removeReservation(Reservation reservation) {
         // equals-method for Reservation is required!
         reservations.remove(reservation);
+    }
+
+    public int nbReservations() {
+        return reservations.size();
+    }
+
+    public int nbReservationsBy(String renter) {
+        int nbReservations = 0;
+        for (Reservation reservation : reservations) {
+            if (reservation.getCarRenter().equals(renter))
+                nbReservations++;
+        }
+        return nbReservations;
     }
 }

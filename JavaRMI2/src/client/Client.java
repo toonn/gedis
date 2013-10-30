@@ -84,7 +84,7 @@ public class Client extends
         SessionCreationServiceRemote sessionCreationService = (SessionCreationServiceRemote) registry
                 .lookup("SessionCreationService");
 
-        Client client = new Client("trips", sessionCreationService);
+        Client client = new Client("../assignment-RMI-23_src/trips", sessionCreationService);
         client.run();
     }
 

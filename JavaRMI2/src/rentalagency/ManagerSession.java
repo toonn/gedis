@@ -19,11 +19,13 @@ public class ManagerSession implements ManagerSessionRemote {
     public void registerCompany(RentalCompanyRemote company)
             throws RemoteException {
         rentalAgency.registerCompany(company);
+        System.out.println(manager + ": Registering " + company.getName() + ".");
     }
 
     @Override
     public void unregisterCompany(String companyName) throws RemoteException {
         rentalAgency.unregisterCompany(companyName);
+        System.out.println(manager + ": Unregistering " + companyName + ".");
     }
 
     @Override
@@ -33,17 +35,20 @@ public class ManagerSession implements ManagerSessionRemote {
             companyNames.add(company.getName());
         }
 
+        System.out.println(manager + ": Listing all companies.");
         return companyNames;
     }
 
     @Override
     public Set<String> getCarsAt(String companyName) throws RemoteException {
+        System.out.println(manager + ": Listing cars at " + companyName + ".");
         return rentalAgency.getCompany(companyName).getAllCarTypeStrings();
     }
 
     @Override
     public int getNbReservations(String companyName, String carType)
             throws RemoteException {
+        System.out.println(manager + ": Getting nb of reservations for " + carType + " at " + companyName + ".");
         return rentalAgency.getCompany(companyName).getNbReservations(carType);
     }
 
@@ -53,6 +58,7 @@ public class ManagerSession implements ManagerSessionRemote {
         for (RentalCompanyRemote company : rentalAgency.getAllCompanies()) {
             nbReservations += company.getNbReservationsBy(client);
         }
+        System.out.println(manager + ": Getting nb of reservations by " + client + ".");
         return nbReservations;
     }
 
@@ -67,12 +73,14 @@ public class ManagerSession implements ManagerSessionRemote {
                 nbReservations = candidateNbReservations;
             }
         }
+        System.out.println(manager + ": Getting most popular company.");
         return mostPopularCompany;
     }
 
     @Override
     public CarType getMostPopularCarTypeAt(String companyName)
             throws RemoteException {
+        System.out.println(manager + ": Getting most popular cartype at " + companyName + ".");
         return rentalAgency.getCompany(companyName).getMostPopularCarType();
     }
 

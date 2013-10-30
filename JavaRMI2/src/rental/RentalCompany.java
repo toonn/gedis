@@ -94,7 +94,7 @@ public class RentalCompany implements RentalCompanyRemote {
      * java.util.Date, java.util.Date)
      */
     @Override
-    public boolean isAvailable(String carTypeName, Date start, Date end) {
+    public synchronized boolean isAvailable(String carTypeName, Date start, Date end) {
         logger.log(Level.INFO, "<{0}> Checking availability for car type {1}",
                 new Object[] { name, carTypeName });
         if (carTypes.containsKey(carTypeName))
@@ -198,7 +198,7 @@ public class RentalCompany implements RentalCompanyRemote {
      * 
      * @see rental.RentalCompanyRemote#confirmQuote(rental.Quote)
      */
-    public Reservation confirmQuote(Quote quote) throws ReservationException {
+    public synchronized Reservation confirmQuote(Quote quote) throws ReservationException {
         logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[] { name,
                 quote.toString() });
         List<Car> availableCars = getAvailableCars(quote.getCarType(), quote
@@ -217,14 +217,14 @@ public class RentalCompany implements RentalCompanyRemote {
         return res;
     }
 
-    public void cancelReservation(Reservation res) {
+    public synchronized void cancelReservation(Reservation res) {
         logger.log(Level.INFO, "<{0}> Cancelling reservation {1}",
                 new Object[] { name, res.toString() });
         getCar(res.getCarId()).removeReservation(res);
     }
 
     @Override
-    public Set<Reservation> confirmQuotes(Set<Quote> quotes)
+    public synchronized Set<Reservation> confirmQuotes(Set<Quote> quotes)
             throws ReservationException, RemoteException {
         for (Quote quote : quotes)
             logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[] {
@@ -255,7 +255,7 @@ public class RentalCompany implements RentalCompanyRemote {
     }
 
     @Override
-    public void rollbackReservations(Set<Reservation> reservations) {
+    public synchronized void rollbackReservations(Set<Reservation> reservations) {
         for (Reservation res : reservations)
             cancelReservation(res);
     }

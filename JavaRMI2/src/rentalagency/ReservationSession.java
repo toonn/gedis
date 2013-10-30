@@ -32,6 +32,7 @@ public class ReservationSession implements ReservationSessionRemote {
                     end));
         }
 
+        System.out.println(client + ": Checking for available cars.");
         return availableCarTypes;
     }
 
@@ -43,7 +44,11 @@ public class ReservationSession implements ReservationSessionRemote {
         Quote quote = rentalAgency.getCompany(companyName).createQuote(
                 constraints, client);
 
-        quotes.get(companyName).add(quote);
+        if (quotes.get(companyName) != null)
+            quotes.get(companyName).add(quote);
+
+        System.out.println(client + ": Create quote for " + carType + " at "
+                + companyName + ".");
     }
 
     @Override
@@ -70,6 +75,7 @@ public class ReservationSession implements ReservationSessionRemote {
             reservations.addAll(companyReservationz);
         }
 
+        System.out.println(client + ": Confirming all quotes.");
         return reservations;
     }
 
@@ -79,6 +85,7 @@ public class ReservationSession implements ReservationSessionRemote {
         for (Set<Quote> companyQuotes : quotes.values())
             allQuotes.addAll(companyQuotes);
 
+        System.out.println(client + ": Getting all quotes.");
         return Collections.unmodifiableSet(allQuotes);
     }
 

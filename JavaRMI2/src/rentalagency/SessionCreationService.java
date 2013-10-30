@@ -14,18 +14,19 @@ public class SessionCreationService implements SessionCreationServiceRemote {
      * .lang.String)
      */
     @Override
-    public ReservationSession getNewReservationSession(String client) {
+    public ReservationSessionRemote getNewReservationSession(String client) {
         ReservationSessionRemote stub = null;
         System.setSecurityManager(null);
         try {
             stub = (ReservationSessionRemote) UnicastRemoteObject.exportObject(
                     new ReservationSession(client), 0);
         } catch (RemoteException e) {
-            // TODO Auto-generated catch block
+            System.out.println("Creating a ReservationSession for " + client + " has failed.");
             e.printStackTrace();
         }
 
-        return (ReservationSession) stub;
+        System.out.println("Created a ReservationSession for " + client + ".");
+        return stub;
     }
 
     /*
@@ -43,11 +44,12 @@ public class SessionCreationService implements SessionCreationServiceRemote {
             stub = (ManagerSessionRemote) UnicastRemoteObject.exportObject(
                     new ManagerSession(manager), 0);
         } catch (RemoteException e) {
-            // TODO Auto-generated catch block
+            System.out.println("Creating a ManagerSession for " + manager + " has failed.");
             e.printStackTrace();
         }
 
-        return (ManagerSessionRemote) stub;
+        System.out.println("Created a ManagerSession for " + manager + ".");
+        return stub;
     }
 
     public static void main(String[] args) {

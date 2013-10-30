@@ -13,8 +13,11 @@ public class RentalServer {
             NumberFormatException, IOException {
         List<Car> hertzCars = loadData("../assignment-RMI-23_src/hertz.csv");
         List<Car> dockxCars = loadData("../assignment-RMI-23_src/dockx.csv");
-        new RentalCompany("Hertz", hertzCars, args[0]);
-        new RentalCompany("Dockx", dockxCars, args[0]);
+        String host = "localhost";
+        if (args.length > 0)
+            host = args[0];
+        new RentalCompany("Hertz", hertzCars, host);
+        new RentalCompany("Dockx", dockxCars, host);
     }
 
     public static List<Car> loadData(String datafile)

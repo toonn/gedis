@@ -80,7 +80,10 @@ public class Client extends
     public static void main(String[] args) throws Exception {
 
         System.setSecurityManager(null);
-        Registry registry = LocateRegistry.getRegistry(args[0]);
+        String host = "localhost";
+        if (args.length > 0)
+            host = args[0];
+        Registry registry = LocateRegistry.getRegistry(host);
         SessionCreationServiceRemote sessionCreationService = (SessionCreationServiceRemote) registry
                 .lookup("SessionCreationService");
 

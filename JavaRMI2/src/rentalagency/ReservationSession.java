@@ -46,6 +46,11 @@ public class ReservationSession implements ReservationSessionRemote {
 
         if (quotes.get(companyName) != null)
             quotes.get(companyName).add(quote);
+        else {
+            Set<Quote> singleQuote = new HashSet<Quote>();
+            singleQuote.add(quote);
+            quotes.put(companyName, singleQuote);
+        }
 
         System.out.println(client + ": Create quote for " + carType + " at "
                 + companyName + ".");

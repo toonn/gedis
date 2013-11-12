@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
@@ -20,16 +21,21 @@ public class ManagerSession implements ManagerSessionRemote {
     @PersistenceContext
     EntityManager em;
     
+    @Override
     public void addCar(String companyName, Car car) throws ReservationException{
+        em.persist(car);
         getRentalCompany(companyName).addCar(car);
     }
     
+    @Override
     public void addCarType(String companyName, CarType type) throws ReservationException{
+        em.persist(type);
         getRentalCompany(companyName).addCarType(type);
     }
     
-    public void addCompany(String companyName) {
-        em.persist(new CarRentalCompany(companyName, null));
+    @Override 
+    public void addCompany(String companyName, List<Car> cars) {
+        em.persist(new CarRentalCompany(companyName, cars));
     }
     
     @Override
@@ -89,23 +95,20 @@ public class ManagerSession implements ManagerSessionRemote {
         return out.size();
     }
     
-       private List<CarRentalCompany> getRentalCompanies(){
-        
-        Query query = em.createNamedQuery("getAllRentalCompanies");
-        List<CarRentalCompany> companies = query.getResultList();
-        
-        return companies;
+    private List<CarRentalCompany> getRentalCompanies(){
+        TypedQuery<CarRentalCompany> query = 
+                em.createNamedQuery("getAllRentalCompanies", CarRentalCompany.class);
+        return query.getResultList();
     }
     
     private CarRentalCompany getRentalCompany(String companyName) throws rental.ReservationException{
-        Query query = em.createNamedQuery("getCompany");
+        TypedQuery<CarRentalCompany> query = 
+                em.createNamedQuery("getCompany", CarRentalCompany.class);
         query.setParameter("companyName", companyName);
-        
-        List<CarRentalCompany> company = query.getResultList();
-        if (company.isEmpty()) {
+        try {
+            return query.getSingleResult();
+        } catch(Exception e) {
             throw new ReservationException("Company doesn't exist!: " + companyName);
         }
-        
-        return company.get(0);
     }
 }

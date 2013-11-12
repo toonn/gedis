@@ -17,6 +17,7 @@ import rental.ReservationConstraints;
 import rental.ReservationException;
 import java.util.Map;
 import java.util.HashMap;
+import javax.persistence.TypedQuery;
 
 @Stateful
 public class CarRentalSession implements CarRentalSessionRemote {
@@ -49,27 +50,23 @@ public class CarRentalSession implements CarRentalSessionRemote {
     
     private Map<String, CarRentalCompany> getRentals(){
         Map<String, CarRentalCompany> rentals = new HashMap<String, CarRentalCompany>();
-        
-        Query query = em.createNamedQuery("getAllRentalCompanies");
+        TypedQuery<CarRentalCompany> query = 
+                em.createNamedQuery("getAllRentalCompanies", CarRentalCompany.class);
         List<CarRentalCompany> companies = query.getResultList();
-        
-        for (CarRentalCompany crc : companies) {
+        for (CarRentalCompany crc : companies)
             rentals.put(crc.getName(), crc);
-        }
-        
         return rentals;
     }
     
     private CarRentalCompany getRentalCompany(String companyName) throws ReservationException{
-        Query query = em.createNamedQuery("getCompany");
+        TypedQuery<CarRentalCompany> query = 
+                em.createNamedQuery("getCompany", CarRentalCompany.class);
         query.setParameter("companyName", companyName);
-        
-        List<CarRentalCompany> company = query.getResultList();
-        if (company.isEmpty()) {
+        try {
+            return query.getSingleResult();
+        } catch(Exception e) {
             throw new ReservationException("Company doesn't exist!: " + companyName);
         }
-        
-        return company.get(0);
     }
 
     @Override

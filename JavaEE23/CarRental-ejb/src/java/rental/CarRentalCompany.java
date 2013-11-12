@@ -1,6 +1,7 @@
 package rental;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -11,8 +12,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
+@NamedQueries({
+        @NamedQuery(
+            name = "getCompany",
+            query = "Select comp from CarRentalCompany comp where comp.name = :companyName"),
+        @NamedQuery(
+            name = "getAllRentalCompanyNames",
+            query = "Select comp.name from CarRentalCompany comp"),
+        @NamedQuery(
+            name = "getAllRentalCompanies",
+            query = "Select comp from CarRentalCompany comp")})
 @Entity
 public class CarRentalCompany implements Serializable {
 
@@ -21,7 +35,8 @@ public class CarRentalCompany implements Serializable {
     private List<Car> cars;
     private Set<CarType> carTypes = new HashSet<CarType>();
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "companyName")
     public List<Car> getCars() {
         return cars;
     }
@@ -29,14 +44,23 @@ public class CarRentalCompany implements Serializable {
     public void setCars(List<Car> cars) {
         this.cars = cars;
     }
+    
+    public void addCar(Car car) {
+        cars.add(car);
+    }
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true)
+    @JoinColumn(name = "companyName")
     public Set<CarType> getCarTypes() {
         return carTypes;
     }
 
     public void setCarTypes(Set<CarType> carTypes) {
         this.carTypes = carTypes;
+    }
+    
+    public void addCarType(CarType type) {
+        carTypes.add(type);
     }
 
     /***************
@@ -48,7 +72,10 @@ public class CarRentalCompany implements Serializable {
     public CarRentalCompany(String name, List<Car> cars) {
         logger.log(Level.INFO, "<{0}> Car Rental Company {0} starting up...", name);
         setName(name);
-        this.cars = cars;
+        if (cars == null)
+            this.cars = new ArrayList<Car>();
+        else
+            this.cars = cars;
         for (Car car : cars) {
             carTypes.add(car.getType());
         }
@@ -70,7 +97,6 @@ public class CarRentalCompany implements Serializable {
      * CAR TYPES *
      *************/
     
-    @OneToMany
     public Collection<CarType> getAllTypes() {
         return carTypes;
     }

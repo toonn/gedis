@@ -14,6 +14,16 @@ public class CarType implements Serializable{
     //trunk space in liters
     private float trunkSpace;
     
+    private String companyName;
+    
+    public String getCompanyName() {
+        return companyName;
+    }
+    
+    public void setCompanyName(String name) {
+        companyName = name;
+    }
+    
     /***************
      * CONSTRUCTOR *
      ***************/

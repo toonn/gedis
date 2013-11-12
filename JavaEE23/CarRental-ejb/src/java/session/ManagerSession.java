@@ -1,24 +1,41 @@
 package session;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
-import rental.RentalStore;
 import rental.Reservation;
 import rental.ReservationException;
 
 @Stateless
 public class ManagerSession implements ManagerSessionRemote {
+    @PersistenceContext
+    EntityManager em;
+    
+    public void addCar(String companyName, Car car) throws ReservationException{
+        getRentalCompany(companyName).addCar(car);
+    }
+    
+    public void addCarType(String companyName, CarType type) throws ReservationException{
+        getRentalCompany(companyName).addCarType(type);
+    }
+    
+    public void addCompany(String companyName) {
+        em.persist(new CarRentalCompany(companyName, null));
+    }
     
     @Override
     public Set<CarType> getCarTypes(String company) {
         try {
-            return new HashSet<CarType>(RentalStore.getRental(company).getAllTypes());
+            return new HashSet<CarType>(getRentalCompany(company).getAllTypes());
         } catch (ReservationException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -26,10 +43,10 @@ public class ManagerSession implements ManagerSessionRemote {
     }
 
     @Override
-    public Set<Integer> getCars(String company, String type) {
+    public Set<Integer> getCarIds(String company, String type) {
         Set<Integer> out = new HashSet<Integer>();
         try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
+            for(Car c: getRentalCompany(company).getCars(type)){
                 out.add(c.getId());
             }
         } catch (ReservationException ex) {
@@ -40,35 +57,55 @@ public class ManagerSession implements ManagerSessionRemote {
     }
 
     @Override
-    public Set<Reservation> getReservations(String company, String type, int id) {
+    public int getNumberOfReservations(String company, String type, int id) {
         try {
-            return RentalStore.getRental(company).getCar(id).getReservations();
+            return getRentalCompany(company).getCar(id).getReservations().size();
         } catch (ReservationException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+            return 0;
         }
     }
 
     @Override
-    public Set<Reservation> getReservations(String company, String type) {
+    public int getNumberOfReservations(String company, String type) {
         Set<Reservation> out = new HashSet<Reservation>();
         try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
+            for(Car c: getRentalCompany(company).getCars(type)){
                 out.addAll(c.getReservations());
             }
         } catch (ReservationException ex) {
             Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+            return 0;
         }
-        return out;
+        return out.size();
     }
 
     @Override
-    public Set<Reservation> getReservationsBy(String renter) {
+    public int getNumberOfReservationsBy(String renter) {
         Set<Reservation> out = new HashSet<Reservation>();
-        for(CarRentalCompany crc : RentalStore.getRentals().values()) {
+        for(CarRentalCompany crc : getRentalCompanies()) {
             out.addAll(crc.getReservationsBy(renter));
         }
-        return out;
+        return out.size();
+    }
+    
+       private List<CarRentalCompany> getRentalCompanies(){
+        
+        Query query = em.createNamedQuery("getAllRentalCompanies");
+        List<CarRentalCompany> companies = query.getResultList();
+        
+        return companies;
+    }
+    
+    private CarRentalCompany getRentalCompany(String companyName) throws rental.ReservationException{
+        Query query = em.createNamedQuery("getCompany");
+        query.setParameter("companyName", companyName);
+        
+        List<CarRentalCompany> company = query.getResultList();
+        if (company.isEmpty()) {
+            throw new ReservationException("Company doesn't exist!: " + companyName);
+        }
+        
+        return company.get(0);
     }
 }

@@ -1,11 +1,9 @@
 package rental;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class Reservation extends Quote {
@@ -42,7 +40,6 @@ public class Reservation extends Quote {
         this.id = id;
     }
     
-    @ManyToOne(cascade = CascadeType.REMOVE, mappedBy = "reservations")
     public int getCarId() {
     	return carId;
     }

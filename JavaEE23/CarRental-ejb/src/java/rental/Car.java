@@ -4,8 +4,11 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -15,6 +18,15 @@ public class Car implements Serializable{
     private int id;
     private CarType type;
     private Set<Reservation> reservations;
+    private String companyName;
+    
+    public String getCompanyName() {
+        return companyName;
+    }
+    
+    public void setCompanyName(String name) {
+        companyName = name;
+    }
 
     public void setId(int id) {
         this.id = id;
@@ -51,7 +63,7 @@ public class Car implements Serializable{
      * CAR TYPE *
      ************/
     
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     public CarType getType() {
         return type;
     }
@@ -81,7 +93,8 @@ public class Car implements Serializable{
         reservations.remove(reservation);
     }
 
-    @OneToMany
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "carId")
     public Set<Reservation> getReservations() {
         return reservations;
     }

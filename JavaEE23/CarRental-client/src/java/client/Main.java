@@ -1,10 +1,8 @@
 package client;
 
 import java.util.Date;
-import java.util.Set;
 import javax.naming.InitialContext;
 import rental.CarType;
-import rental.Reservation;
 import rental.ReservationConstraints;
 import session.CarRentalSessionRemote;
 import session.ManagerSessionRemote;
@@ -52,12 +50,24 @@ public class Main extends AbstractScriptedTripTest<CarRentalSessionRemote, Manag
     }
     
     @Override
-    protected Set<Reservation> getReservationsBy(ManagerSessionRemote ms, String renterName) throws Exception {
-        return ms.getReservationsBy(renterName);
+    protected int getNumberOfReservationsBy(ManagerSessionRemote ms, String renterName) throws Exception {
+        return ms.getNumberOfReservationsBy(renterName);
     }
 
     @Override
-    protected int getReservationsForCarType(ManagerSessionRemote ms, String name, String carType) throws Exception {
-        return ms.getReservations(name, carType).size();
+    protected int getNumberOfReservationsForCarType(ManagerSessionRemote ms, String name, String carType) throws Exception {
+        return ms.getNumberOfReservations(name, carType);
+    }
+
+    @Override
+    protected String getMostPopularCarRentalCompany(ManagerSessionRemote ms) throws Exception {
+        System.err.println("To be implemented.");
+        return null;
+    }
+
+    @Override
+    protected CarType getMostPopularCarTypeIn(ManagerSessionRemote ms, String carRentalCompanyName) throws Exception {
+        System.err.println("To be implemented.");
+        return null;
     }
 }

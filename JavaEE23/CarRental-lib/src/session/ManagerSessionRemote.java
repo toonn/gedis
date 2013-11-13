@@ -18,6 +18,8 @@ public interface ManagerSessionRemote {
     
     public Set<CarType> getCarTypes(String company);
     
+    public CarType getCarType(CarType type);
+    
     public Set<Integer> getCarIds(String company,String type);
     
     public int getNumberOfReservations(String company, String type, int carId);
@@ -25,4 +27,8 @@ public interface ManagerSessionRemote {
     public int getNumberOfReservations(String company, String type);
       
     public int getNumberOfReservationsBy(String renter);
+    
+    public String getMostPopularCompany() throws rental.ReservationException;
+    
+    public CarType getMostPopularCarTypeIn(String companyName) throws rental.ReservationException;
 }

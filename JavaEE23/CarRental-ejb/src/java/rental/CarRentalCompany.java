@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -20,13 +23,19 @@ import javax.persistence.OneToMany;
 @NamedQueries({
         @NamedQuery(
             name = "getCompany",
-            query = "Select comp from CarRentalCompany comp where comp.name = :companyName"),
+            query = "SELECT comp FROM CarRentalCompany comp WHERE comp.name = :companyName"),
         @NamedQuery(
             name = "getAllRentalCompanyNames",
-            query = "Select comp.name from CarRentalCompany comp"),
+            query = "SELECT comp.name FROM CarRentalCompany comp"),
         @NamedQuery(
             name = "getAllRentalCompanies",
-            query = "Select comp from CarRentalCompany comp")})
+            query = "SELECT comp FROM CarRentalCompany comp"),
+        @NamedQuery(
+            name = "getMostPopularCompany",
+            query = "SELECT res.rentalCompany FROM Reservation res GROUP BY res.rentalCompany ORDER BY COUNT(res.rentalCompany) DESC"),
+        @NamedQuery(
+            name = "getMostPopularCarTypeIn",
+            query = "SELECT res.carType FROM Reservation res WHERE res.rentalCompany = :companyName GROUP BY res.carType ORDER BY COUNT(res.carType) DESC")})
 @Entity
 public class CarRentalCompany implements Serializable {
 
@@ -35,13 +44,16 @@ public class CarRentalCompany implements Serializable {
     private List<Car> cars;
     private Set<CarType> carTypes = new HashSet<CarType>();
 
-    @OneToMany(orphanRemoval = true)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "companyName")
     public List<Car> getCars() {
         return cars;
     }
 
     public void setCars(List<Car> cars) {
+        carTypes = new HashSet<CarType>();
+        for (Car car : cars)
+            carTypes.add(car.getType());
         this.cars = cars;
     }
     
@@ -49,7 +61,7 @@ public class CarRentalCompany implements Serializable {
         cars.add(car);
     }
 
-    @OneToMany(orphanRemoval = true)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "companyName")
     public Set<CarType> getCarTypes() {
         return carTypes;
@@ -73,12 +85,9 @@ public class CarRentalCompany implements Serializable {
         logger.log(Level.INFO, "<{0}> Car Rental Company {0} starting up...", name);
         setName(name);
         if (cars == null)
-            this.cars = new ArrayList<Car>();
+            setCars(new ArrayList<Car>());
         else
-            this.cars = cars;
-        for (Car car : cars) {
-            carTypes.add(car.getType());
-        }
+            setCars(cars);
     }
 
     /********
@@ -194,6 +203,7 @@ public class CarRentalCompany implements Serializable {
                 / (1000 * 60 * 60 * 24D));
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Reservation confirmQuote(Quote quote) throws ReservationException {
         logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
         List<Car> availableCars = getAvailableCars(quote.getCarType(), quote.getStartDate(), quote.getEndDate());

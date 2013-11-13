@@ -62,6 +62,8 @@ public class CarRentalSession implements CarRentalSessionRemote {
         TypedQuery<CarRentalCompany> query = 
                 em.createNamedQuery("getCompany", CarRentalCompany.class);
         query.setParameter("companyName", companyName);
+        
+        query.getSingleResult();
         try {
             return query.getSingleResult();
         } catch(Exception e) {

@@ -7,7 +7,6 @@ import javax.persistence.Id;
 
 @Entity
 public class Reservation extends Quote {
-
     
     private int id;
 

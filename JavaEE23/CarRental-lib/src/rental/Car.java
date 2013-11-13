@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,8 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import rental.CarType;
-import rental.Reservation;
 
 @Entity
 public class Car implements Serializable{
@@ -65,7 +65,7 @@ public class Car implements Serializable{
      * CAR TYPE *
      ************/
     
-    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public CarType getType() {
         return type;
     }
@@ -95,7 +95,7 @@ public class Car implements Serializable{
         reservations.remove(reservation);
     }
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "carId")
     public Set<Reservation> getReservations() {
         return reservations;

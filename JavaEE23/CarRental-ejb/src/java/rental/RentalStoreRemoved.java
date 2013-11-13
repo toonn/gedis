@@ -65,7 +65,7 @@ public class RentalStoreRemoved {
             //tokenize on ,
             StringTokenizer csvReader = new StringTokenizer(line, ",");
             //create new car type from first 5 fields
-            CarType type = new CarType(csvReader.nextToken(),
+            CarType type = new CarType("", csvReader.nextToken(),
                     Integer.parseInt(csvReader.nextToken()),
                     Float.parseFloat(csvReader.nextToken()),
                     Double.parseDouble(csvReader.nextToken()),

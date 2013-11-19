@@ -11,12 +11,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import com.google.appengine.api.datastore.Key;
 
-@NamedQuery(name = "getCarType", query = "SELECT carType FROM CarType carType WHERE carType.name = :carTypeName AND carType.companyName = :companyName")
+@NamedQueries({
+		@NamedQuery(name = "getCarType", query = "SELECT carType FROM CarType carType "
+				+ "WHERE carType.name = :carTypeName "
+				+ "AND carType.companyName = :companyName"),
+		@NamedQuery(name = "getCarTypeNamesByCompany", query = "SELECT carType.name FROM CarType carType "
+				+ "WHERE carType.companyName = :companyName")})
 @Entity
 public class CarType {
 	@Id
@@ -32,8 +38,8 @@ public class CarType {
 
 	private String companyName;
 
-	@OneToMany(mappedBy = "type", cascade = { CascadeType.PERSIST,
-			CascadeType.REMOVE })
+	@OneToMany(mappedBy = "type", cascade = {CascadeType.PERSIST,
+			CascadeType.REMOVE})
 	private Set<Car> cars = new HashSet<>();
 
 	/***************

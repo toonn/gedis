@@ -13,10 +13,16 @@ import java.util.logging.Logger;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import ds.gae.ReservationException;
 
+@NamedQueries({
+		@NamedQuery(name = "getCompanyNames", query = "SELECT c.name FROM CarRentalCompany c"),
+		@NamedQuery(name = "getCompany", query = "SELECT c FROM CarRentalCompany c "
+				+ "WHERE c.name = :companyName")})
 @Entity
 public class CarRentalCompany {
 
@@ -26,7 +32,7 @@ public class CarRentalCompany {
 	@Id
 	private String name;
 
-	@OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
 	private Set<CarType> carTypes = new HashSet<CarType>();
 
 	/***************
@@ -71,7 +77,7 @@ public class CarRentalCompany {
 
 	public boolean isAvailable(String carTypeName, Date start, Date end) {
 		logger.log(Level.INFO, "<{0}> Checking availability for car type {1}",
-				new Object[] { name, carTypeName });
+				new Object[]{name, carTypeName});
 
 		CarType ct = getCarType(carTypeName);
 		return getAvailableCarTypes(start, end).contains(ct);
@@ -126,7 +132,7 @@ public class CarRentalCompany {
 		logger.log(
 				Level.INFO,
 				"<{0}> Creating tentative reservation for {1} with constraints {2}",
-				new Object[] { name, client, constraints.toString() });
+				new Object[]{name, client, constraints.toString()});
 
 		CarType type = getCarType(constraints.getCarType());
 
@@ -152,8 +158,8 @@ public class CarRentalCompany {
 	}
 
 	public Reservation confirmQuote(Quote quote) throws ReservationException {
-		logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[] { name,
-				quote.toString() });
+		logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name,
+				quote.toString()});
 		List<Car> availableCars = getAvailableCars(quote.getCarType(),
 				quote.getStartDate(), quote.getEndDate());
 		if (availableCars.isEmpty())
@@ -172,7 +178,7 @@ public class CarRentalCompany {
 
 	public void cancelReservation(Reservation res) {
 		logger.log(Level.INFO, "<{0}> Cancelling reservation {1}",
-				new Object[] { name, res.toString() });
+				new Object[]{name, res.toString()});
 		getCar(res.getCarId()).removeReservation(res);
 	}
 }

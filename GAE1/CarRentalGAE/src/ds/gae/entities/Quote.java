@@ -2,6 +2,9 @@ package ds.gae.entities;
 
 import java.util.Date;
 
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
 public class Quote {
 
     private Date startDate;
@@ -14,6 +17,7 @@ public class Quote {
     /***************
 	 * CONSTRUCTOR *
 	 ***************/
+    protected Quote() {}
 
     Quote(String carRenter, Date start, Date end, String rentalCompany, String carType, double rentalPrice) {
         this.carRenter = carRenter;

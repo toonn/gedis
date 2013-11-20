@@ -22,6 +22,8 @@ import com.google.appengine.api.datastore.Key;
 				+ "WHERE carType.name = :carTypeName "
 				+ "AND carType.companyName = :companyName"),
 		@NamedQuery(name = "getCarTypeNamesByCompany", query = "SELECT carType.name FROM CarType carType "
+				+ "WHERE carType.companyName = :companyName"),
+		@NamedQuery(name = "getCarTypeByCompany", query = "SELECT carType FROM CarType carType "
 				+ "WHERE carType.companyName = :companyName")})
 @Entity
 public class CarType {

@@ -185,21 +185,15 @@ public class CarRentalModel {
 	 * @return the list of reservations of the given car renter
 	 */
 	public List<Reservation> getReservations(String renter) {
-		// FIXME: use persistence instead
+		// FIXED: use persistence instead
 
-		List<Reservation> out = new ArrayList<Reservation>();
-
-		for (CarRentalCompany crc : CRCS.values()) {
-			for (Car c : crc.getCars()) {
-				for (Reservation r : c.getReservations()) {
-					if (r.getCarRenter().equals(renter)) {
-						out.add(r);
-					}
-				}
-			}
-		}
-
-		return out;
+		em = getEntityManager();
+		TypedQuery<Reservation> query = em.createNamedQuery("getReservations",
+				Reservation.class);
+		query.setParameter("renter", renter);
+		List<Reservation> reservations = query.getResultList();
+		em.close();
+		return reservations;
 	}
 
 	/**
@@ -210,13 +204,16 @@ public class CarRentalModel {
 	 * @return The list of car types in the given car rental company.
 	 */
 	public Collection<CarType> getCarTypesOfCarRentalCompany(String crcName) {
-		// FIXME: use persistence instead
+		// FIXED: use persistence instead
 
-		CarRentalCompany crc = CRCS.get(crcName);
-		Collection<CarType> out = new ArrayList<CarType>(crc.getAllCarTypes());
-		return out;
+		em = getEntityManager();
+		TypedQuery<CarType> query = em.createNamedQuery("getCarTypeByCompany",
+				CarType.class);
+		query.setParameter("companyName", crcName);
+		Collection<CarType> carTypes = query.getResultList();
+		em.close();
+		return carTypes;
 	}
-
 	/**
 	 * Get the list of cars of the given car type in the given car rental
 	 * company.
@@ -262,17 +259,14 @@ public class CarRentalModel {
 	 * companies)
 	 */
 	private List<Car> getCarsByCarType(String crcName, CarType carType) {
-		// FIXME: use persistence instead
-
-		List<Car> out = new ArrayList<Car>();
-		for (CarRentalCompany crc : CRCS.values()) {
-			for (Car c : crc.getCars()) {
-				if (c.getType() == carType) {
-					out.add(c);
-				}
-			}
-		}
-		return out;
+		// FIXED: use persistence instead
+		em = getEntityManager();
+		TypedQuery<Car> query = em.createNamedQuery("getCarsByType",
+				Car.class);
+		query.setParameter("type", carType);
+		List<Car> cars = query.getResultList();
+		em.close();
+		return cars;
 	}
 
 	/**

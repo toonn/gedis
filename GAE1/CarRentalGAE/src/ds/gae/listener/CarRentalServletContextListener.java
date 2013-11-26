@@ -66,7 +66,6 @@ public class CarRentalServletContextListener implements ServletContextListener {
 			EntityManager em = EMF.get().createEntityManager();
 			em.persist(company);
 			em.close();
-
 		} catch (NumberFormatException ex) {
 			Logger.getLogger(CarRentalServletContextListener.class.getName())
 					.log(Level.SEVERE, "bad file", ex);

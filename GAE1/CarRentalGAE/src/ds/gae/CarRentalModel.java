@@ -1,5 +1,7 @@
 package ds.gae;
 
+import static com.google.appengine.api.taskqueue.TaskOptions.Builder.withPayload;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +13,9 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
 
 import ds.gae.entities.Car;
 import ds.gae.entities.CarRentalCompany;
@@ -144,39 +149,12 @@ public class CarRentalModel {
 	 * 
 	 * @param quotes
 	 *            the quotes to confirm
-	 * @return The list of reservations, resulting from confirming all given
-	 *         quotes.
-	 * 
-	 * @throws ReservationException
-	 *             One of the quotes cannot be confirmed. Therefore none of the
-	 *             given quotes is confirmed.
 	 */
-	public List<Reservation> confirmQuotes(List<Quote> quotes)
-			throws ReservationException {
-		em = getEntityManager();
-		List<Reservation> reservations = new ArrayList<>();
-		try {
-			for (Quote q : quotes) {
-				TypedQuery<CarRentalCompany> query = em.createNamedQuery(
-						"getCompany", CarRentalCompany.class);
-				query.setParameter("companyName", q.getRentalCompany());
-				CarRentalCompany crc = query.getSingleResult();
-				reservations.add(crc.confirmQuote(q));
-			}
-			return reservations;
-		} catch (ReservationException e) {
-			for (Reservation res : reservations) {
-				TypedQuery<CarRentalCompany> query2 = em.createNamedQuery(
-						"getCompany", CarRentalCompany.class);
-				query2.setParameter("companyName", res.getRentalCompany());
-				CarRentalCompany crc = query2.getSingleResult();
-				crc.cancelReservation(res);
-			}
-			throw e;
-		} finally {
-			em.close();
-		}
+	public void confirmQuotes(List<Quote> quotes) {
+		Queue queue = QueueFactory.getDefaultQueue();
+		queue.add(withPayload(new ConfirmQuotesTask(quotes)));
 	}
+
 	/**
 	 * Get all reservations made by the given car renter.
 	 * 
@@ -214,6 +192,7 @@ public class CarRentalModel {
 		em.close();
 		return carTypes;
 	}
+
 	/**
 	 * Get the list of cars of the given car type in the given car rental
 	 * company.
@@ -261,8 +240,7 @@ public class CarRentalModel {
 	private List<Car> getCarsByCarType(String crcName, CarType carType) {
 		// FIXED: use persistence instead
 		em = getEntityManager();
-		TypedQuery<Car> query = em.createNamedQuery("getCarsByType",
-				Car.class);
+		TypedQuery<Car> query = em.createNamedQuery("getCarsByType", Car.class);
 		query.setParameter("type", carType);
 		List<Car> cars = query.getResultList();
 		em.close();

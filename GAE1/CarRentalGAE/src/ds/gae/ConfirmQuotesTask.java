@@ -14,7 +14,6 @@ import com.google.appengine.api.taskqueue.DeferredTask;
 import ds.gae.entities.CarRentalCompany;
 import ds.gae.entities.Quote;
 import ds.gae.entities.Reservation;
-import ds.gae.servlets.ConfirmQuotesServlet;
 import ds.gae.view.ViewTools;
 
 public class ConfirmQuotesTask implements DeferredTask {
@@ -67,7 +66,6 @@ public class ConfirmQuotesTask implements DeferredTask {
 		ChannelService channelService = ChannelServiceFactory
 				.getChannelService();
 		String channelKey = "xyz";
-		// This is what actually sends the message.
 		String reservationsString = "";
 		for (Reservation r : reservations) {
 			reservationsString += "<tr><td>" + r.getRentalCompany() + "</td>"

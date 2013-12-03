@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
+
 import ds.gae.CarRentalModel;
 import ds.gae.entities.Quote;
 import ds.gae.view.JSPSite;
@@ -35,7 +38,28 @@ public class ConfirmQuotesServlet extends HttpServlet {
 
 		session.setAttribute("quotes", new HashMap<String, ArrayList<Quote>>());
 
-		// TODO
+		ChannelService channelService = ChannelServiceFactory
+				.getChannelService();
+		// channelKey moet normaal user-afhankelijk zijn
+		String channelKey = "xyz";
+		String token = channelService.createChannel(channelKey);
+		session.setAttribute("token", token);
+
+		// BufferedReader in = new BufferedReader(new FileReader(
+		// JSPSite.CONFIRM_QUOTES_RESPONSE.url().substring(1)));
+		//
+		// String confirmQuotesResponse = "";
+		// String inputLine;
+		// while ((inputLine = in.readLine()) != null)
+		// confirmQuotesResponse += inputLine;
+		// in.close();
+		//
+		// confirmQuotesResponse.replaceAll("\\{\\{ token \\}\\}", token);
+		//
+		//resp.setContentType("text/html");
+		//resp.getWriter().write("<script>alert('hello world');</script>");
+		// resp.getWriter().write("<body><script>channel = new goog.appengine.Channel('"+ token +"');socket = channel.open();socket.onopen = onOpened;socket.onmessage = onMessage;socket.onerror = onError;socket.onclose = onClose;var quotes = '';function onOpened() {alert('channel opened');document.getElementById('response').innerHTML='Your reservations are currently being processed, results will be shown in a moment.';}function onMessage(msg) {quotes += msg;document.getElementById('response').innerHTML=quotes;}function onMessage(err) {alert(err);}function onClose() {}</script><p id='response'>response<p>");
+
 		// If you wish confirmQuotesReply.jsp to be shown to the client as
 		// a response of calling this servlet, please replace the following line
 		resp.sendRedirect(JSPSite.CONFIRM_QUOTES_RESPONSE.url());

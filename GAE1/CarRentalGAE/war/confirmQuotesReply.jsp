@@ -4,6 +4,7 @@
 <% 
 	String renter = (String)session.getAttribute("renter");
 	JSPSite currentSite = JSPSite.CONFIRM_QUOTES_RESPONSE;
+	String token = (String) session.getAttribute("token");
 
 %>   
  
@@ -22,6 +23,56 @@ if (currentSite != JSPSite.LOGIN && currentSite != JSPSite.PERSIST_TEST && rente
 	<title>Car Rental Application</title>
 </head>
 <body>
+	<script src='/_ah/channel/jsapi'></script>
+	<script>
+    	var quotes = "";
+    	
+    	onOpened = function() {
+    		document.getElementById("response").innerHTML="Your reservations are currently being processed, results will be shown in a moment.";
+		}
+
+		onMessage = function(msg) {
+			quotes += msg;
+			document.getElementById("response").innerHTML=quotes;
+		}
+
+		onError = function(err) {
+   		 	alert(err);
+		}
+
+		onClose = function() {
+			alert('channel closed');
+		}
+		
+  	  	/*channel = new goog.appengine.Channel('<%= token %>');
+   	 	socket = channel.open();
+   	 	socket.onopen = onOpened;
+    	socket.onmessage = onMessage;
+    	socket.onerror = onError;
+    	socket.onclose = onClose;*/
+    	
+    	
+    	openChannel = function() {
+			var token = '<%= token %>';
+			var channel = new goog.appengine.Channel(token);
+			var handler = {
+				'onopen': onOpened,
+				'onmessage': onMessage,
+				'onerror': function() {},
+				'onclose': function() {}
+			};
+			var socket = channel.open(handler);
+			socket.onopen = onOpened;
+			socket.onmessage = onMessage;
+		}
+
+		initialize = function() {
+			openChannel();
+		}
+
+		initialize();
+  	</script>
+
 	<div id="mainWrapper">
 		<div id="headerWrapper">
 			<h1>Car Rental Application</h1>
@@ -52,9 +103,8 @@ for (JSPSite site : JSPSite.publiclyLinkedValues()) {
 			<div class="frameDiv" style="margin: 150px 150px;">
 				<div class="groupLabel">Reply</div>
 				<div class="group">
-					<p>
-					TODO: Here you can give some information to client who is currently 
-							logged in as user <%=renter%>.
+					<p id="response">
+					Something's wrong..
 					</p>
 				</div>
 			</div>

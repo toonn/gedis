@@ -6,11 +6,16 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
+import com.google.appengine.api.channel.ChannelMessage;
+import com.google.appengine.api.channel.ChannelService;
+import com.google.appengine.api.channel.ChannelServiceFactory;
 import com.google.appengine.api.taskqueue.DeferredTask;
 
 import ds.gae.entities.CarRentalCompany;
 import ds.gae.entities.Quote;
 import ds.gae.entities.Reservation;
+import ds.gae.servlets.ConfirmQuotesServlet;
+import ds.gae.view.ViewTools;
 
 public class ConfirmQuotesTask implements DeferredTask {
 	private final List<Quote> quotes;
@@ -59,7 +64,21 @@ public class ConfirmQuotesTask implements DeferredTask {
 	}
 
 	public void reservationsSucceeded(List<Reservation> reservations) {
-		// TODO implement back-channel
+		ChannelService channelService = ChannelServiceFactory
+				.getChannelService();
+		String channelKey = "xyz";
+		// This is what actually sends the message.
+		String reservationsString = "";
+		for (Reservation r : reservations) {
+			reservationsString += "<tr><td>" + r.getRentalCompany() + "</td>"
+					+ "<td>" + r.getCarType() + "/" + r.getCarId() + "</td>"
+					+ "<td>" + ViewTools.DATE_FORMAT.format(r.getStartDate())
+					+ " - " + ViewTools.DATE_FORMAT.format(r.getEndDate())
+					+ "</td>" + "<td class='numbers'>" + r.getRentalPrice()
+					+ " ���</td></tr>";
+		}
+		channelService.sendMessage(new ChannelMessage(channelKey,
+				reservationsString));
 	}
 
 	public void reservationsFailed() {

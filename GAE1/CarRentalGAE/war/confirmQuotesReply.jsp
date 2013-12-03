@@ -32,8 +32,10 @@ if (currentSite != JSPSite.LOGIN && currentSite != JSPSite.PERSIST_TEST && rente
 		}
 
 		onMessage = function(msg) {
-			quotes += msg;
-			document.getElementById("response").innerHTML=quotes;
+			data = JSON.parse(m.data);
+			document.getElementById("response").innerHTML=data;
+			/*quotes += msg;
+			document.getElementById("response").innerHTML=quotes;*/
 		}
 
 		onError = function(err) {

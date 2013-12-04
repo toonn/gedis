@@ -25,36 +25,45 @@ if (currentSite != JSPSite.LOGIN && currentSite != JSPSite.PERSIST_TEST && rente
 <body>
 	<script src='/_ah/channel/jsapi'></script>
 	<script>
-    	var quotes = "";
+    	var quotes = '<p>The following reservations have been confirmed:</p></br>' +
+    				'<table>' +
+						'<tr>' +
+							'<th>Rental Company</th>' +				
+							'<th>Car Type/ID</th>' +
+							'<th>Rental Period</th>' +
+							'<th>Rental Price</th>' +	
+						'</tr>';
     	
-    	onOpened = function() {
-    		document.getElementById("response").innerHTML="Your reservations are currently being processed, results will be shown in a moment.";
+    	function onOpened() {
+    		document.getElementById("response").innerHTML="<p>Your reservations are currently being processed, results will be shown in a moment.</p>";
 		}
 
-		onMessage = function(msg) {
-			data = JSON.parse(m.data);
-			document.getElementById("response").innerHTML=data;
-			/*quotes += msg;
-			document.getElementById("response").innerHTML=quotes;*/
+		function onMessage(msg) {
+			if(msg.data === 'fail\n') {
+				document.getElementById("response").innerHTML="<p style='color: #ff0000; background-color: #ff9999;'>At this time we are unable to confirm your reservations, please review your quotes.</p>";
+			} else {
+				quotes += msg.data;
+				document.getElementById("response").innerHTML=quotes+'</table>';
+			}
 		}
 
-		onError = function(err) {
-   		 	alert(err);
+		function onError(err) {
+   		 	alert(err.data);
 		}
 
-		onClose = function() {
-			alert('channel closed');
+		function onClose() {
+			//alert('channel closed');
 		}
 		
-  	  	/*channel = new goog.appengine.Channel('<%= token %>');
+  	  	channel = new goog.appengine.Channel('<%= token %>');
    	 	socket = channel.open();
    	 	socket.onopen = onOpened;
     	socket.onmessage = onMessage;
     	socket.onerror = onError;
-    	socket.onclose = onClose;*/
+    	socket.onclose = onClose;
     	
     	
-    	openChannel = function() {
+    	/*openChannel = function() {
 			var token = '<%= token %>';
 			var channel = new goog.appengine.Channel(token);
 			var handler = {
@@ -72,7 +81,7 @@ if (currentSite != JSPSite.LOGIN && currentSite != JSPSite.PERSIST_TEST && rente
 			openChannel();
 		}
 
-		initialize();
+		initialize();*/
   	</script>
 
 	<div id="mainWrapper">
@@ -105,9 +114,9 @@ for (JSPSite site : JSPSite.publiclyLinkedValues()) {
 			<div class="frameDiv" style="margin: 150px 150px;">
 				<div class="groupLabel">Reply</div>
 				<div class="group">
-					<p id="response">
-					Something's wrong..
-					</p>
+					<div id="response">
+					Something's wrong...
+					</div>
 				</div>
 			</div>
 

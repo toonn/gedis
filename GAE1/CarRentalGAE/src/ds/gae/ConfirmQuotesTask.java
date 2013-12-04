@@ -15,6 +15,7 @@ import com.google.appengine.labs.repackaged.org.json.JSONException;
 import ds.gae.entities.CarRentalCompany;
 import ds.gae.entities.Quote;
 import ds.gae.entities.Reservation;
+import ds.gae.view.ViewTools;
 
 public class ConfirmQuotesTask implements DeferredTask {
 	private final List<Quote> quotes;
@@ -66,26 +67,39 @@ public class ConfirmQuotesTask implements DeferredTask {
 		ChannelService channelService = ChannelServiceFactory
 				.getChannelService();
 		String channelKey = "xyz";
-		/*
-		 * String reservationsString = ""; for (Reservation r : reservations) {
-		 * reservationsString += "<tr><td>" + r.getRentalCompany() + "</td>" +
-		 * "<td>" + r.getCarType() + "/" + r.getCarId() + "</td>" + "<td>" +
-		 * ViewTools.DATE_FORMAT.format(r.getStartDate()) + " - " +
-		 * ViewTools.DATE_FORMAT.format(r.getEndDate()) + "</td>" +
-		 * "<td class='numbers'>" + r.getRentalPrice() + " ���</td></tr>";
-		 * }
-		 */
-		String message = "";
+
+		String reservationsString = "";
+		for (Reservation r : reservations) {
+			reservationsString += "<tr><td>" + r.getRentalCompany() + "</td>"
+					+ "<td>" + r.getCarType() + "/" + r.getCarId() + "</td>"
+					+ "<td>" + ViewTools.DATE_FORMAT.format(r.getStartDate())
+					+ " - " + ViewTools.DATE_FORMAT.format(r.getEndDate())
+					+ "</td>" + "<td class='numbers'>" + r.getRentalPrice()
+					+ " \u20ac</td></tr>";
+		}
+		
 		try {
-			message = JSONParser.toJSON(reservations);
-		} catch (JSONException e) {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		String message = reservationsString;
 		channelService.sendMessage(new ChannelMessage(channelKey, message));
 	}
 
 	public void reservationsFailed() {
-		// TODO implement back-channel
+		ChannelService channelService = ChannelServiceFactory
+				.getChannelService();
+		String channelKey = "xyz";
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		channelService.sendMessage(new ChannelMessage(channelKey, "fail"));
 	}
 
 }

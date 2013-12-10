@@ -39,7 +39,7 @@ if (currentSite != JSPSite.LOGIN && currentSite != JSPSite.PERSIST_TEST && rente
 		}
 
 		function onMessage(msg) {
-			if(msg.data === 'fail\n') {
+			if(msg.data.indexOf('fail') !== -1) {
 				document.getElementById("response").innerHTML="<p style='color: #ff0000; background-color: #ff9999;'>At this time we are unable to confirm your reservations, please review your quotes.</p>";
 			} else {
 				quotes += msg.data;
@@ -115,7 +115,7 @@ for (JSPSite site : JSPSite.publiclyLinkedValues()) {
 				<div class="groupLabel">Reply</div>
 				<div class="group">
 					<div id="response">
-					Something's wrong...
+					<p style='color: #FFFFFF;'>If this message doesn't disappear, something's wrong...</p>
 					</div>
 				</div>
 			</div>

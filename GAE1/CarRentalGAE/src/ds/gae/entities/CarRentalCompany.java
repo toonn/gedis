@@ -12,11 +12,13 @@ import java.util.logging.Logger;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
+import ds.gae.EMF;
 import ds.gae.ReservationException;
 
 @NamedQueries({
